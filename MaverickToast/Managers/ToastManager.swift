@@ -6,6 +6,52 @@
 //
 
 import SwiftUI
+import UIKit
+
+// MARK: - Toast Window Manager
+class ToastWindowManager {
+    static let shared = ToastWindowManager()
+    
+    private var window: UIWindow?
+    private var hostingController: UIHostingController<ToastContainerWrapper>?
+    
+    private init() {}
+    
+    func setup() {
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else {
+            return
+        }
+        
+        let window = UIWindow(windowScene: windowScene)
+        window.windowLevel = .alert + 1
+        window.backgroundColor = .clear
+        window.isUserInteractionEnabled = false
+        
+        let containerView = ToastContainerWrapper()
+        let hostingController = UIHostingController(rootView: containerView)
+        hostingController.view.backgroundColor = .clear
+        
+        window.rootViewController = hostingController
+        window.isHidden = false
+        
+        self.window = window
+        self.hostingController = hostingController
+    }
+}
+
+// MARK: - Toast Container Wrapper
+struct ToastContainerWrapper: View {
+    @StateObject private var toastManager = ToastManager.shared
+    
+    var body: some View {
+        ToastContainer(
+            toasts: toastManager.toasts,
+            onDismiss: { toast in
+                toastManager.dismissToast(toast)
+            }
+        )
+    }
+}
 
 // MARK: - Toast Manager
 class ToastManager: ObservableObject {
@@ -14,7 +60,10 @@ class ToastManager: ObservableObject {
     @Published var toasts: [ToastMessage] = []
     
     private init() {
-        // Timer removed - toasts auto-dismiss through UI animations
+        // Setup window on first access
+        DispatchQueue.main.async {
+            ToastWindowManager.shared.setup()
+        }
     }
     
     // MARK: - Public Methods
@@ -74,31 +123,5 @@ class ToastManager: ObservableObject {
         }
     }
     
-}
-
-// MARK: - Toast View Modifier
-struct ToastModifier: ViewModifier {
-    @StateObject private var toastManager = ToastManager.shared
-    
-    func body(content: Content) -> some View {
-        content
-            .overlay(alignment: .top) {
-                ToastContainer(
-                    toasts: toastManager.toasts,
-                    onDismiss: { toast in
-                        toastManager.dismissToast(toast)
-                    }
-                )
-            }
-    }
-}
-
-// MARK: - View Extension for Toast
-extension View {
-    /// Adds toast functionality to the entire app
-    /// Call this once in your main app or root view
-    func maverickToast() -> some View {
-        self.modifier(ToastModifier())
-    }
 }
 

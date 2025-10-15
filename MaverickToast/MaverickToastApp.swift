@@ -12,7 +12,6 @@ struct MaverickToastApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-            .maverickToast()
         }
     }
 }
