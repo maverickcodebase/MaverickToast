@@ -2,7 +2,7 @@
 
 **A professional toast notification system for SwiftUI that appears above everything - sheets, alerts, and all presentations!**
 
-![MaverickToast Banner](![MaverickToast Banner](assets/thumbnail.png))
+![MaverickToast Banner](assets/thumbnail.png)
 
 ## 📺 Video Tutorial
 
